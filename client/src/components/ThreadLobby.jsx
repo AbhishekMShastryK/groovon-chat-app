@@ -71,8 +71,8 @@ function ThreadLobby() {
     : {};
 
   return (
-    <div className="flex flex-col items-center w-full max-w-4xl mx-auto">
-      <main className="p-4 h-[77vh] w-full overflow-y-scroll flex flex-col scrollbar-thin scrollbar-thumb-purple-600 bg-gray-200 rounded-t-lg shadow-inner">
+    <div className="flex flex-col items-center w-full max-w-full sm:max-w-4xl mx-auto">
+      <main className="p-4 h-[calc(95vh-10rem)] w-full overflow-y-scroll flex flex-col scrollbar-thin scrollbar-thumb-purple-600 bg-gray-200 rounded-t-lg shadow-inner">
         {Object.keys(groupedMessages).map((date) => (
           <div key={date}>
             <div className="flex items-center my-4">
@@ -90,14 +90,14 @@ function ThreadLobby() {
 
       <form
         onSubmit={(e) => e.preventDefault()}
-        className="flex items-center w-full h-auto rounded-b-lg shadow-lg px-4 py-2 bg-gray-900"
+        className="flex items-center w-full h-auto rounded-b-lg shadow-lg px-2 sm:px-4 py-2 bg-gray-900"
       >
         <textarea
           value={messageInput}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Write a message..."
-          className="flex-grow text-lg bg-gray-700 text-white outline-none border-none px-4 py-2 rounded-lg mr-2 resize-none overflow-y-auto scrollbar-thin scrollbar-thumb-purple-600 scrollbar-track-gray-800"
+          className="flex-grow text-base sm:text-lg bg-gray-700 text-white outline-none border-none px-2 sm:px-4 py-2 rounded-lg mr-2 resize-none overflow-y-auto scrollbar-thin scrollbar-thumb-purple-600 scrollbar-track-gray-800"
           style={{
             minHeight: '2.5rem',
             maxHeight: '5rem',
@@ -105,7 +105,7 @@ function ThreadLobby() {
           }}
         />
         <button
-          className={`bg-[#af7ac5] hover:bg-[#9b59b6] text-white font-bold py-2 px-4 rounded-lg transition duration-300 flex justify-center items-center ${
+          className={`bg-[#af7ac5] hover:bg-[#9b59b6] text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition duration-300 flex justify-center items-center ${
             !messageInput ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
           }`}
           type="button"
@@ -115,7 +115,7 @@ function ThreadLobby() {
           <img
             src={planeArrow}
             alt="Send"
-            className="w-6 h-6"
+            className="w-5 h-5 sm:w-6 sm:h-6"
             style={{ filter: 'invert(1)' }}
           />
         </button>

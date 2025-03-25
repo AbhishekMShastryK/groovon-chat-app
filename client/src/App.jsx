@@ -40,7 +40,7 @@ function App() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-[#f5eef8]">
       <div className="bg-white w-[95vw] max-w-4xl rounded-xl shadow-2xl overflow-hidden">
         <header className="bg-gray-900 h-[8vh] min-h-[50px] text-white flex items-center justify-between px-6">
           <h1 className="text-2xl md:text-3xl font-bold">Groovon</h1>
@@ -53,9 +53,9 @@ function App() {
                     : 'hover:bg-gray-700 hover:rounded-full'
                 }`}
                 style={{
-                  width: '40px', // Set a fixed width
-                  height: '40px', // Set a fixed height to make it a perfect circle
-                  fontSize: '20px', // Set font size directly
+                  width: '40px',
+                  height: '40px',
+                  fontSize: '22px',
                 }}
                 onClick={toggleMenu}
               >
