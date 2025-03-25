@@ -1,48 +1,60 @@
 import React, { useState } from 'react';
-import { GoogleAuthProvider, signInWithPopup, FacebookAuthProvider, GithubAuthProvider } from 'firebase/auth';
-import { auth } from '../../../config/firebase';
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  FacebookAuthProvider,
+  GithubAuthProvider,
+} from 'firebase/auth';
+import { auth, firestore } from '../../../config/firebase'; // Ensure firestore is imported for Firestore
+import { doc, setDoc, getDoc } from 'firebase/firestore'; // Firestore methods
+import {
+  uniqueNamesGenerator,
+  adjectives,
+  animals,
+  NumberDictionary,
+} from 'unique-names-generator'; // Import unique-names-generator
 
 function SignIn() {
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // State to store error messages
 
-  const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
+  const generateRandomName = () => {
+    const numberDictionary = NumberDictionary.generate({ min: 10, max: 99 }); // Generate a 2-digit number
+    return uniqueNamesGenerator({
+      dictionaries: [adjectives, animals, numberDictionary], // Use adjectives, animals, and numbers
+      separator: '', // No separator between words
+      style: 'capital', // Capitalize each word
+    });
+  };
+
+  const handleSignIn = async (provider) => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log('Signed in with Google:', user.email);
+
+      // Check if the user already has a name in Firestore
+      const userDocRef = doc(firestore, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // Assign a random name if it's the user's first login
+        const randomName = generateRandomName();
+        await setDoc(userDocRef, { name: randomName, email: user.email });
+        console.log('Assigned random name:', randomName);
+      } else {
+        const existingName = userDoc.data().name;
+        console.log('User already exists:', existingName);
+      }
+
       setErrorMessage(''); // Clear any previous error
     } catch (error) {
-      console.error('Error signing in with Google:', error.message);
-      setErrorMessage('Error signing in with Google. Please try again.');
+      console.error('Error signing in:', error.message);
+      setErrorMessage('Error signing in. Please try again.');
     }
   };
 
-  const signInWithFacebook = async () => {
-    const provider = new FacebookAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      console.log('Signed in with Facebook:', user.email);
-      setErrorMessage(''); // Clear any previous error
-    } catch (error) {
-      console.error('Error signing in with Facebook:', error.message);
-      setErrorMessage('Error signing in with Facebook. Please sign in with Google instead.');
-    }
-  };
-
-  const signInWithGitHub = async () => {
-    const provider = new GithubAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      console.log('Signed in with GitHub:', user.email);
-      setErrorMessage(''); // Clear any previous error
-    } catch (error) {
-      console.error('Error signing in with GitHub:', error.message);
-      setErrorMessage('Error signing in with GitHub. Please sign in with Google instead.');
-    }
-  };
+  const signInWithGoogle = () => handleSignIn(new GoogleAuthProvider());
+  const signInWithFacebook = () => handleSignIn(new FacebookAuthProvider());
+  const signInWithGitHub = () => handleSignIn(new GithubAuthProvider());
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
