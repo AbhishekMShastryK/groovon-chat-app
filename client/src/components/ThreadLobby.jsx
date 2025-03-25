@@ -9,7 +9,6 @@ import {
 } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { auth, firestore } from '../../../config/firebase';
-import defaultAvatar from '../assets/default-avatar.png';
 import planeArrow from '../assets/paper-plane.png';
 import { format } from 'date-fns';
 
@@ -27,13 +26,12 @@ function ThreadLobby() {
 
   const handleSendMessage = async () => {
     if (!messageInput.trim()) return;
-    const { uid, photoURL } = auth.currentUser;
+    const { uid } = auth.currentUser;
 
     await addDoc(messagesCollectionRef, {
       text: messageInput,
       createdAt: serverTimestamp(),
       uid,
-      photoURL,
     });
 
     setMessageInput('');
@@ -127,29 +125,31 @@ function ThreadLobby() {
 }
 
 function ThreadMessage({ message }) {
-  const { text, uid, photoURL, createdAt } = message;
+  const { text, uid, createdAt } = message;
   const isSent = uid === auth.currentUser.uid;
+
+  const avatarUrl = `https://api.dicebear.com/9.x/pixel-art/svg?seed=Destiny`;
 
   const time = createdAt ? format(createdAt.toDate(), 'h:mm a') : '';
 
   return (
-    <div
-      className={`flex mb-4 ${isSent ? 'justify-end' : 'justify-start'}`}
-    >
+    <div className={`flex mb-4 ${isSent ? 'justify-end' : 'justify-start'}`}>
       {!isSent && (
-        <>
+        <div className="w-10 h-10 rounded-full border border-gray-300 mx-1 flex items-center justify-center bg-white overflow-hidden">
           <img
-            src={photoURL || defaultAvatar}
+            src={avatarUrl}
             alt="User Avatar"
-            className="w-10 h-10 rounded-full border border-gray-300 mx-1"
+            className="w-7 h-7"
+            style={{ objectFit: 'contain' }}
           />
-        </>
+        </div>
       )}
 
       <div
         className={`max-w-[70%] px-4 py-2 rounded-3xl text-lg shadow-md flex flex-col ${
           isSent ? 'bg-[#9b59b6] text-white' : 'bg-white text-black'
         }`}
+        style={{ wordBreak: 'break-word' }}
       >
         <span className="text-left">{text}</span>
         <span
@@ -162,13 +162,14 @@ function ThreadMessage({ message }) {
       </div>
 
       {isSent && (
-        <>
+        <div className="w-10 h-10 rounded-full border border-gray-300 mx-1 flex items-center justify-center bg-white overflow-hidden">
           <img
-            src={photoURL || defaultAvatar}
+            src={avatarUrl}
             alt="User Avatar"
-            className="w-10 h-10 rounded-full border border-gray-300 mx-1"
+            className="w-7 h-7"
+            style={{ objectFit: 'contain' }}
           />
-        </>
+        </div>
       )}
     </div>
   );
