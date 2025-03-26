@@ -23,18 +23,68 @@ function ThreadLobby() {
     limit(100)
   );
   const [messages] = useCollectionData(latestMessagesQuery, { idField: 'id' });
-  const [messageInput, setMessageInput] = useState('');
+  const [messageInput, setMessageInput] = useState(() => localStorage.getItem('unsentMessage') || '');
+
+  // Scroll to bottom when component mounts and when messages change
+  useEffect(() => {
+    scrollToBottomRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [messages]);
+
+  // Additional effect to ensure scroll to bottom on initial load
+  useEffect(() => {
+    // Small delay to ensure DOM is fully rendered
+    const timer = setTimeout(() => {
+      scrollToBottomRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Save unsent message to localStorage
+  useEffect(() => {
+    localStorage.setItem('unsentMessage', messageInput);
+  }, [messageInput]);
+
+  useEffect(() => {
+    // Fix for iOS viewport height issues when keyboard appears
+    const metaViewport = document.querySelector('meta[name=viewport]');
+    if (metaViewport) {
+      metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+    }
+    
+    // Add event listeners to fix iOS keyboard issues
+    document.addEventListener('focusin', () => {
+      // When input is focused (keyboard appears)
+      window.scrollTo(0, 0);
+    });
+    
+    document.addEventListener('focusout', () => {
+      // When input loses focus (keyboard disappears)
+      window.scrollTo(0, 0);
+    });
+    
+    return () => {
+      document.removeEventListener('focusin', () => {});
+      document.removeEventListener('focusout', () => {});
+    };
+  }, []);
 
   const handleSendMessage = async () => {
     if (!messageInput.trim()) return;
+    
     const { uid } = auth.currentUser;
+    const now = new Date();
+    
     await addDoc(messagesCollectionRef, {
       text: messageInput,
       createdAt: serverTimestamp(),
+      clientTimestamp: now,
+      formattedDate: format(now, 'MMMM d, yyyy'),
       uid,
     });
+    
     setMessageInput('');
-    scrollToBottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    localStorage.removeItem('unsentMessage');
   };
 
   const handleInputChange = (e) => {
@@ -55,22 +105,44 @@ function ThreadLobby() {
   };
 
   const groupMessagesByDate = (messages) => {
+    // Same function but we need to reverse the messages since we're getting them in desc order
     const grouped = {};
-    messages.forEach((message) => {
-      const date = message.createdAt
-        ? format(message.createdAt.toDate(), 'MMMM d, yyyy')
-        : 'Unknown Date';
-      if (!grouped[date]) {
-        grouped[date] = [];
+    
+    // If messages is null or empty, return empty object
+    if (!messages || messages.length === 0) return grouped;
+    
+    // Process messages in reverse order (oldest to newest) for display
+    const orderedMessages = [...messages].reverse();
+    
+    orderedMessages.forEach((message) => {
+      try {
+        // Use pre-formatted date if available
+        if (message.formattedDate) {
+          grouped[message.formattedDate] = grouped[message.formattedDate] || [];
+          grouped[message.formattedDate].push(message);
+          return;
+        }
+        
+        // Otherwise use timestamps
+        const messageDate = message.createdAt?.toDate() || 
+                           (message.clientTimestamp ? new Date(message.clientTimestamp) : new Date());
+        
+        const isValidDate = messageDate instanceof Date && !isNaN(messageDate);
+        const date = isValidDate ? format(messageDate, 'MMMM d, yyyy') : 'Recent';
+        
+        grouped[date] = grouped[date] || [];
+        grouped[date].push(message);
+      } catch (error) {
+        console.error("Error processing message date:", error);
+        grouped['Recent'] = grouped['Recent'] || [];
+        grouped['Recent'].push(message);
       }
-      grouped[date].push(message);
     });
+    
     return grouped;
   };
 
-  const groupedMessages = messages
-    ? groupMessagesByDate([...messages].reverse())
-    : {};
+  const groupedMessages = messages ? groupMessagesByDate(messages) : {};
 
   return (
     <div className="flex flex-col items-center w-full max-w-full sm:max-w-4xl mx-auto">
@@ -102,7 +174,7 @@ function ThreadLobby() {
           onKeyDown={handleKeyDown}
           placeholder="Write a message..."
           className="flex-grow text-sm sm:text-base bg-gray-700 text-white outline-none border-none px-2 sm:px-4 py-2 rounded-lg mr-2 resize-none overflow-y-auto scrollbar-thin scrollbar-thumb-purple-600 scrollbar-track-gray-800"
-          style={{ minHeight: '2.5rem', maxHeight: '5rem', overflowY: 'auto' }}
+          style={{ minHeight: '2.5rem', maxHeight: '5rem', overflowY: 'auto', WebkitAppearance: 'none', }}
         />
         <button
           className={`bg-[#af7ac5] hover:bg-[#9b59b6] text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition duration-300 flex justify-center items-center ${
@@ -125,11 +197,22 @@ function ThreadLobby() {
 }
 
 function ThreadMessage({ message }) {
-  const { text, uid, createdAt } = message;
+  const { text, uid, createdAt, clientTimestamp } = message;
   const isSent = uid === auth.currentUser.uid;
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState(null);
   const [senderName, setSenderName] = useState('');
-  const time = createdAt ? format(createdAt.toDate(), 'h:mm a') : '';
+  
+  let time = '';
+  try {
+    const messageTime = createdAt?.toDate() || 
+                       (clientTimestamp ? new Date(clientTimestamp) : new Date());
+    
+    time = messageTime instanceof Date && !isNaN(messageTime) ? format(messageTime, 'h:mm a') : '';
+  } catch (error) {
+    console.error("Error formatting message time:", error);
+  }
+  
+  const defaultAvatar = 'https://api.dicebear.com/9.x/pixel-art/svg?seed=Destiny';
 
   useEffect(() => {
     const userRef = doc(firestore, 'users', uid);
@@ -137,10 +220,7 @@ function ThreadMessage({ message }) {
       if (docSnapshot.exists()) {
         const userData = docSnapshot.data();
         setSenderName(userData.name || 'Unknown');
-        setAvatarUrl(
-          userData.avatarUrl ||
-            'https://api.dicebear.com/9.x/pixel-art/svg?seed=Default'
-        );
+        setAvatarUrl(userData.avatarUrl || null);
       }
     });
 
@@ -152,7 +232,7 @@ function ThreadMessage({ message }) {
       {!isSent && (
         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 mx-1 flex items-center justify-center bg-white overflow-hidden">
           <img
-            src={avatarUrl}
+            src={avatarUrl || defaultAvatar}
             alt="User Avatar"
             className="w-6 h-6 sm:w-7 sm:h-7"
             style={{ objectFit: 'contain' }}
@@ -186,7 +266,7 @@ function ThreadMessage({ message }) {
       {isSent && (
         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 mx-1 flex items-center justify-center bg-white overflow-hidden">
           <img
-            src={avatarUrl}
+            src={avatarUrl || defaultAvatar}
             alt="User Avatar"
             className="w-6 h-6 sm:w-7 sm:h-7"
             style={{ objectFit: 'contain' }}
