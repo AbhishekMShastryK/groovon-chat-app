@@ -147,7 +147,10 @@ function ThreadMessage({ message }) {
       if (docSnapshot.exists()) {
         const userData = docSnapshot.data();
         setSenderName(userData.name || 'Unknown');
-        setAvatarUrl(userData.avatarUrl || 'https://api.dicebear.com/9.x/pixel-art/svg?seed=Default');
+        setAvatarUrl(
+          userData.avatarUrl ||
+            'https://api.dicebear.com/9.x/pixel-art/svg?seed=Default'
+        );
       }
     });
 

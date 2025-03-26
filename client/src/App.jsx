@@ -9,18 +9,38 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import AvatarSelectionModal from './components/AvatarSelectionModal';
 
 const avatarNames = [
-  'Jade', 'Aiden', 'Alexander', 'Maria', 'Brooklynn', 'Liliana', 
-  'Luis', 'Oliver', 'Kimberly', 'Brian', 'Sadie', 'Mason', 
-  'Caleb', 'Mackenzie', 'Valentina', 'Jude', 'Ryker', 'Eliza', 
-  'Andrea', 'Sawyer', 'Destiny',
+  'Jade',
+  'Aiden',
+  'Alexander',
+  'Maria',
+  'Brooklynn',
+  'Liliana',
+  'Luis',
+  'Oliver',
+  'Kimberly',
+  'Brian',
+  'Sadie',
+  'Mason',
+  'Caleb',
+  'Mackenzie',
+  'Valentina',
+  'Jude',
+  'Ryker',
+  'Eliza',
+  'Andrea',
+  'Sawyer',
+  'Destiny',
 ];
 
 function App() {
   const [user, loading] = useAuthState(auth);
+  const [dataLoading, setDataLoading] = useState(true); // New state to track Firestore loading
   const [menuOpen, setMenuOpen] = useState(false);
   const [avatarModalOpen, setAvatarModalOpen] = useState(false); // State for modal visibility
   const [userName, setUserName] = useState('User'); // State to store the user's name
-  const [userAvatar, setUserAvatar] = useState('https://api.dicebear.com/9.x/pixel-art/svg?seed=Destiny'); // State to store the user's avatar URL
+  const [userAvatar, setUserAvatar] = useState(
+    'https://api.dicebear.com/9.x/pixel-art/svg?seed=Destiny'
+  ); // State to store the user's avatar URL
   const menuRef = useRef(null);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -48,7 +68,7 @@ function App() {
     const fetchUserName = async () => {
       if (user) {
         try {
-          const userRef = doc(firestore, 'users', user.uid); // Adjust the collection name if needed
+          const userRef = doc(firestore, 'users', user.uid);
           const userDoc = await getDoc(userRef);
           if (userDoc.exists()) {
             const userData = userDoc.data();
@@ -57,7 +77,11 @@ function App() {
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
+        } finally {
+          setDataLoading(false); // Firestore fetch is complete
         }
+      } else {
+        setDataLoading(false); // If user is not logged in, skip waiting
       }
     };
 
@@ -78,7 +102,7 @@ function App() {
     };
   }, []);
 
-  if (loading) {
+  if (loading || dataLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-100">
         <div className="loader"></div>
@@ -93,7 +117,6 @@ function App() {
           <h1 className="text-2xl md:text-3xl font-bold">Groovon</h1>
           {user && ( // Only show the menu for authenticated users
             <div className="flex items-center">
-              
               <span className="mr-4 text-sm md:text-base font-medium flex items-center">
                 <div className="w-10 h-10 rounded-full border border-gray-300 mx-1 mr-2 flex items-center justify-center bg-white overflow-hidden">
                   <img
@@ -143,7 +166,17 @@ function App() {
         </header>
 
         <section className="flex flex-col justify-center flex-grow p-4 h-[90vh]">
-          {user ? <ThreadLobby /> : <SignIn />}
+          {user ? (
+            dataLoading ? (
+              <div className="flex justify-center items-center h-full">
+                <div className="loader"></div>
+              </div>
+            ) : (
+              <ThreadLobby />
+            )
+          ) : (
+            <SignIn />
+          )}
         </section>
       </div>
 

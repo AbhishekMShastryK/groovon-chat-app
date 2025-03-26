@@ -40,7 +40,11 @@ function SignIn() {
       if (!userDoc.exists()) {
         // Create a new document with a random name and default avatar
         const randomName = generateRandomName();
-        await setDoc(userDocRef, { name: randomName, avatarUrl: defaultAvatarUrl, email: user.email });
+        await setDoc(userDocRef, {
+          name: randomName,
+          avatarUrl: defaultAvatarUrl,
+          email: user.email,
+        });
       } else {
         const userData = userDoc.data();
         const updates = {};
@@ -71,12 +75,14 @@ function SignIn() {
       if (provider instanceof GoogleAuthProvider) {
         setErrorMessage('Error signing in with Google. Please try again.');
       } else if (provider instanceof FacebookAuthProvider) {
-        setErrorMessage('Error signing in with Facebook. Please try signing in with Google instead.');
-      }
-      else if (provider instanceof GithubAuthProvider) {
-        setErrorMessage('Error signing in with GitHub. Please try signing in with Google instead.');
-      }
-      else {
+        setErrorMessage(
+          'Error signing in with Facebook. Please try signing in with Google instead.'
+        );
+      } else if (provider instanceof GithubAuthProvider) {
+        setErrorMessage(
+          'Error signing in with GitHub. Please try signing in with Google instead.'
+        );
+      } else {
         setErrorMessage('Error signing in. Please try again.');
       }
     }

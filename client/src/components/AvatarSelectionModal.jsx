@@ -15,13 +15,13 @@ const AvatarSelectionModal = ({ avatarNames, onSelect, onClose }) => {
                 onClick={() => onSelect(name)}
               >
                 <div className="w-12 h-12 rounded-full border border-gray-300 mx-1 flex items-center justify-center bg-white overflow-hidden">
-          <img
-            src={avatarUrl}
-            alt="User Avatar"
-            className="w-9 h-9"
-            style={{ objectFit: 'contain' }}
-          />
-        </div>
+                  <img
+                    src={avatarUrl}
+                    alt="User Avatar"
+                    className="w-9 h-9"
+                    style={{ objectFit: 'contain' }}
+                  />
+                </div>
               </button>
             );
           })}
