@@ -34,13 +34,13 @@ const avatarNames = [
 
 function App() {
   const [user, loading] = useAuthState(auth);
-  const [dataLoading, setDataLoading] = useState(true); // New state to track Firestore loading
+  const [dataLoading, setDataLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [avatarModalOpen, setAvatarModalOpen] = useState(false); // State for modal visibility
-  const [userName, setUserName] = useState(''); // State to store the user's name
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false);
+  const [userName, setUserName] = useState('');
   const [userAvatar, setUserAvatar] = useState(
     'https://api.dicebear.com/9.x/pixel-art/svg?seed=Destiny'
-  ); // State to store the user's avatar URL
+  );
   const menuRef = useRef(null);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -55,15 +55,14 @@ function App() {
         const avatarUrl = `https://api.dicebear.com/9.x/pixel-art/svg?seed=${avatarName}`;
         const userRef = doc(firestore, 'users', user.uid);
         await setDoc(userRef, { avatarUrl }, { merge: true });
-        setUserAvatar(avatarUrl); // Update the avatar in the UI
-        setAvatarModalOpen(false); // Close the modal
+        setUserAvatar(avatarUrl);
+        setAvatarModalOpen(false);
       } catch (error) {
         console.error('Error updating avatar:', error);
       }
     }
   };
 
-  // Fetch user's name from Firestore
   useEffect(() => {
     const fetchUserName = async () => {
       if (user) {
@@ -78,17 +77,16 @@ function App() {
         } catch (error) {
           console.error('Error fetching user data:', error);
         } finally {
-          setDataLoading(false); // Firestore fetch is complete
+          setDataLoading(false);
         }
       } else {
-        setDataLoading(false); // If user is not logged in, skip waiting
+        setDataLoading(false);
       }
     };
 
     fetchUserName();
   }, [user]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -111,18 +109,18 @@ function App() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#f5eef8]">
-      <div className="bg-white w-full max-w-4xl rounded-xl shadow-2xl overflow-hidden mx-4 sm:mx-6 lg:mx-8">
-        <header className="bg-gray-900 h-[8vh] min-h-[50px] text-white flex items-center justify-between px-4 sm:px-6 lg:px-8">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Groovon</h1>
-          {user && ( // Only show the menu for authenticated users
+    <div className="flex justify-center items-center min-h-screen bg-[#f5eef8] p-2 sm:p-4">
+      <div className="bg-white w-full max-w-4xl rounded-xl shadow-2xl overflow-hidden mx-2 sm:mx-4 lg:mx-8">
+        <header className="bg-gray-900 flex flex-wrap items-center justify-between px-2 sm:px-4 lg:px-8 py-3">
+          <h1 className="text-lg text-white sm:text-xl md:text-3xl font-bold">Groovon</h1>
+          {user && (
             <div className="flex items-center">
-              <span className="mr-4 text-sm md:text-base font-medium flex items-center">
-                <div className="w-10 h-10 rounded-full border border-gray-300 mx-1 mr-2 flex items-center justify-center bg-white overflow-hidden">
+              <span className="mr-2 sm:mr-4 text-xs sm:text-sm md:text-base text-white font-medium flex items-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 mx-1 mr-2 flex items-center justify-center bg-white overflow-hidden">
                   <img
                     src={userAvatar}
                     alt="User Avatar"
-                    className="w-7 h-7"
+                    className="w-6 h-6 sm:w-7 sm:h-7"
                     style={{ objectFit: 'contain' }}
                   />
                 </div>
@@ -130,30 +128,26 @@ function App() {
               </span>
               <div className="relative" ref={menuRef}>
                 <button
-                  className={`flex items-center justify-center focus:outline-none cursor-pointer transition-all duration-300 ${
+                  className={`flex items-center justify-center text-white focus:outline-none cursor-pointer transition-all duration-300 ${
                     menuOpen
                       ? 'bg-[#af7ac5] rounded-full'
                       : 'hover:bg-gray-700 hover:rounded-full'
                   }`}
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    fontSize: '22px',
-                  }}
+                  style={{ width: '40px', height: '40px', fontSize: '22px' }}
                   onClick={toggleMenu}
                 >
                   &#8942;
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                  <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-md shadow-lg z-10">
                     <button
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#d7bde2] hover:text-gray-900 transition-colors duration-200 cursor-pointer"
+                      className="block w-full text-left px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-[#d7bde2] hover:text-gray-900 transition-colors duration-200 cursor-pointer"
                       onClick={() => setAvatarModalOpen(true)}
                     >
                       Change Avatar
                     </button>
                     <button
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#d7bde2] hover:text-gray-900 transition-colors duration-200 cursor-pointer"
+                      className="block w-full text-left px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-[#d7bde2] hover:text-gray-900 transition-colors duration-200 cursor-pointer"
                       onClick={handleSignOut}
                     >
                       Sign Out
@@ -165,7 +159,7 @@ function App() {
           )}
         </header>
 
-        <section className="flex flex-col justify-center flex-grow p-4 h-[90vh]">
+        <section className="flex flex-col justify-center flex-grow p-2 sm:p-4 h-[85vh] md:h-[90vh]">
           {user ? (
             dataLoading ? (
               <div className="flex justify-center items-center h-full">
