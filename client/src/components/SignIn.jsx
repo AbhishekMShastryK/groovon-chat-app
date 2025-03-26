@@ -31,24 +31,54 @@ function SignIn() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Check if the user already has a name in Firestore
+      // Check if the user already has a document in Firestore
       const userDocRef = doc(firestore, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
 
+      const defaultAvatarUrl = `https://api.dicebear.com/9.x/pixel-art/svg?seed=Destiny`;
+
       if (!userDoc.exists()) {
-        // Assign a random name if it's the user's first login
+        // Create a new document with a random name and default avatar
         const randomName = generateRandomName();
-        await setDoc(userDocRef, { name: randomName, email: user.email });
-        console.log('Assigned random name:', randomName);
+        await setDoc(userDocRef, { name: randomName, avatarUrl: defaultAvatarUrl, email: user.email });
       } else {
-        const existingName = userDoc.data().name;
-        console.log('User already exists:', existingName);
+        const userData = userDoc.data();
+        const updates = {};
+
+        // Check if the 'name' field exists
+        if (!userData.name) {
+          updates.name = generateRandomName();
+        }
+
+        // Check if the 'avatarUrl' field exists
+        if (!userData.avatarUrl) {
+          updates.avatarUrl = defaultAvatarUrl;
+        }
+
+        // Update the document only if there are missing fields
+        if (Object.keys(updates).length > 0) {
+          await setDoc(userDocRef, { ...userData, ...updates });
+        }
+
+        console.log('User already exists:', userData.name || updates.name);
       }
 
       setErrorMessage(''); // Clear any previous error
     } catch (error) {
       console.error('Error signing in:', error.message);
-      setErrorMessage('Error signing in. Please try again.');
+
+      // Set a specific error message for Google sign-in
+      if (provider instanceof GoogleAuthProvider) {
+        setErrorMessage('Error signing in with Google. Please try again.');
+      } else if (provider instanceof FacebookAuthProvider) {
+        setErrorMessage('Error signing in with Facebook. Please try signing in with Google instead.');
+      }
+      else if (provider instanceof GithubAuthProvider) {
+        setErrorMessage('Error signing in with GitHub. Please try signing in with Google instead.');
+      }
+      else {
+        setErrorMessage('Error signing in. Please try again.');
+      }
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   collection,
   query,
@@ -6,6 +6,9 @@ import {
   limit,
   addDoc,
   serverTimestamp,
+  doc,
+  getDoc,
+  onSnapshot,
 } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { auth, firestore } from '../../../config/firebase';
@@ -49,6 +52,10 @@ function ThreadLobby() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    } else if (e.key === 'Enter' && e.shiftKey) {
+      // Allow Shift + Enter to insert a new line
+      e.preventDefault();
+      setMessageInput((prev) => prev + '\n');
     }
   };
 
@@ -128,9 +135,24 @@ function ThreadMessage({ message }) {
   const { text, uid, createdAt } = message;
   const isSent = uid === auth.currentUser.uid;
 
-  const avatarUrl = `https://api.dicebear.com/9.x/pixel-art/svg?seed=Destiny`;
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [senderName, setSenderName] = useState('');
 
   const time = createdAt ? format(createdAt.toDate(), 'h:mm a') : '';
+
+  // Fetch the sender's name and avatar from Firestore
+  useEffect(() => {
+    const userRef = doc(firestore, 'users', uid);
+    const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const userData = docSnapshot.data();
+        setSenderName(userData.name || 'Unknown');
+        setAvatarUrl(userData.avatarUrl || 'https://api.dicebear.com/9.x/pixel-art/svg?seed=Default');
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup the listener on unmount
+  }, [uid]);
 
   return (
     <div className={`flex mb-4 ${isSent ? 'justify-end' : 'justify-start'}`}>
@@ -151,7 +173,16 @@ function ThreadMessage({ message }) {
         }`}
         style={{ wordBreak: 'break-word' }}
       >
-        <span className="text-left">{text}</span>
+        {/* Show sender's name for messages not sent by the current user */}
+        {!isSent && (
+          <span className="text-sm font-semibold text-[#76448a] mb-1">
+            {senderName}
+          </span>
+        )}
+        {/* Apply white-space: pre-wrap to preserve new lines */}
+        <span className="text-left" style={{ whiteSpace: 'pre-wrap' }}>
+          {text}
+        </span>
         <span
           className={`text-[0.700rem] mt-1 ${
             isSent ? 'text-right text-gray-200' : 'text-right text-gray-500'
