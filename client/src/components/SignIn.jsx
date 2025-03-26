@@ -94,12 +94,12 @@ function SignIn() {
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-bold text-center mb-6">Sign In</h2>
+      <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-11/12 sm:w-96">
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Sign In</h2>
         {errorMessage && (
           <p className="text-red-500 text-center mb-4">{errorMessage}</p>
         )}
-        <div className="mt-6 text-center">
+        <div className="mt-4 sm:mt-6 text-center">
           <button
             className="w-full bg-[#b03a2e] hover:bg-[#cb4335] text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 cursor-pointer"
             onClick={signInWithGoogle}

@@ -37,7 +37,7 @@ function App() {
   const [dataLoading, setDataLoading] = useState(true); // New state to track Firestore loading
   const [menuOpen, setMenuOpen] = useState(false);
   const [avatarModalOpen, setAvatarModalOpen] = useState(false); // State for modal visibility
-  const [userName, setUserName] = useState('User'); // State to store the user's name
+  const [userName, setUserName] = useState(''); // State to store the user's name
   const [userAvatar, setUserAvatar] = useState(
     'https://api.dicebear.com/9.x/pixel-art/svg?seed=Destiny'
   ); // State to store the user's avatar URL
@@ -112,9 +112,9 @@ function App() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#f5eef8]">
-      <div className="bg-white w-[95vw] max-w-4xl rounded-xl shadow-2xl overflow-hidden">
-        <header className="bg-gray-900 h-[8vh] min-h-[50px] text-white flex items-center justify-between px-6">
-          <h1 className="text-2xl md:text-3xl font-bold">Groovon</h1>
+      <div className="bg-white w-full max-w-4xl rounded-xl shadow-2xl overflow-hidden mx-4 sm:mx-6 lg:mx-8">
+        <header className="bg-gray-900 h-[8vh] min-h-[50px] text-white flex items-center justify-between px-4 sm:px-6 lg:px-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Groovon</h1>
           {user && ( // Only show the menu for authenticated users
             <div className="flex items-center">
               <span className="mr-4 text-sm md:text-base font-medium flex items-center">
