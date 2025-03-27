@@ -112,7 +112,9 @@ function App() {
     <div className="flex justify-center items-center min-h-screen bg-[#f5eef8] p-2 sm:p-4">
       <div className="bg-white w-full max-w-4xl rounded-xl shadow-2xl overflow-hidden mx-2 sm:mx-4 lg:mx-8">
         <header className="bg-gray-900 flex flex-wrap items-center justify-between px-2 sm:px-4 lg:px-8 py-3">
-          <h1 className="text-lg text-white sm:text-xl md:text-3xl font-bold">Groovon</h1>
+          <h1 className="text-lg text-white sm:text-xl md:text-3xl font-bold">
+            Groovon
+          </h1>
           {user && (
             <div className="flex items-center">
               <span className="mr-2 sm:mr-4 text-xs sm:text-sm md:text-base text-white font-medium flex items-center">
@@ -139,15 +141,15 @@ function App() {
                   &#8942;
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-md shadow-lg z-10">
+                  <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-md shadow-lg z-10">
                     <button
-                      className="block w-full text-left px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-[#d7bde2] hover:text-gray-900 transition-colors duration-200 cursor-pointer"
+                      className="block w-full text-left px-4 sm:px-5 py-3 text-sm sm:text-base text-gray-700 hover:bg-[#d7bde2] hover:text-gray-900 transition-colors duration-200 cursor-pointer"
                       onClick={() => setAvatarModalOpen(true)}
                     >
                       Change Avatar
                     </button>
                     <button
-                      className="block w-full text-left px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-[#d7bde2] hover:text-gray-900 transition-colors duration-200 cursor-pointer"
+                      className="block w-full text-left px-4 sm:px-5 py-3 text-sm sm:text-base text-gray-700 hover:bg-[#d7bde2] hover:text-gray-900 transition-colors duration-200 cursor-pointer"
                       onClick={handleSignOut}
                     >
                       Sign Out

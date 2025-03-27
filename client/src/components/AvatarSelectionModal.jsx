@@ -4,7 +4,9 @@ const AvatarSelectionModal = ({ avatarNames, onSelect, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-2">
       <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-md sm:max-w-lg">
-        <h2 className="text-lg sm:text-xl font-bold mb-4 text-center">Select an Avatar</h2>
+        <h2 className="text-lg sm:text-xl font-bold mb-4 text-center">
+          Select an Avatar
+        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
           {avatarNames.map((name) => {
             const avatarUrl = `https://api.dicebear.com/9.x/pixel-art/svg?seed=${name}`;

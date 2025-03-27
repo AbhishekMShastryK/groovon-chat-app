@@ -62,9 +62,13 @@ function SignIn() {
       if (provider instanceof GoogleAuthProvider) {
         setErrorMessage('Error signing in with Google. Please try again.');
       } else if (provider instanceof FacebookAuthProvider) {
-        setErrorMessage('Error signing in with Facebook. Please try signing in with Google instead.');
+        setErrorMessage(
+          'Error signing in with Facebook. Please try signing in with Google instead.'
+        );
       } else if (provider instanceof GithubAuthProvider) {
-        setErrorMessage('Error signing in with GitHub. Please try signing in with Google instead.');
+        setErrorMessage(
+          'Error signing in with GitHub. Please try signing in with Google instead.'
+        );
       } else {
         setErrorMessage('Error signing in. Please try again.');
       }
@@ -78,7 +82,9 @@ function SignIn() {
   return (
     <div className="flex items-center justify-center w-full h-full p-2">
       <div className="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-lg w-11/12 sm:w-96">
-        <h2 className="text-lg sm:text-xl font-bold text-center mb-4 sm:mb-6">Sign In</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-center mb-4 sm:mb-6">
+          Sign In
+        </h2>
         {errorMessage && (
           <p className="text-red-500 text-center mb-4">{errorMessage}</p>
         )}
@@ -89,14 +95,18 @@ function SignIn() {
           >
             Sign in with Google
           </button>
-          <p className="my-3 sm:my-4 text-gray-500 font-medium text-sm sm:text-lg">or</p>
+          <p className="my-3 sm:my-4 text-gray-500 font-medium text-sm sm:text-lg">
+            or
+          </p>
           <button
             className="w-full bg-[#2874a6] hover:bg-[#2e86c1] text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 cursor-pointer text-sm sm:text-base"
             onClick={signInWithFacebook}
           >
             Sign in with Facebook
           </button>
-          <p className="my-3 sm:my-4 text-gray-500 font-medium text-sm sm:text-lg">or</p>
+          <p className="my-3 sm:my-4 text-gray-500 font-medium text-sm sm:text-lg">
+            or
+          </p>
           <button
             className="w-full bg-[#212f3d] hover:bg-[#273746] text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 cursor-pointer text-sm sm:text-base"
             onClick={signInWithGitHub}
