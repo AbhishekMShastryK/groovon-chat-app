@@ -44,7 +44,6 @@ function ThreadLobby() {
       'crap',
       'shoot',
       'piss',
-      'butt',
       'damn',
       'sadist',
       'idiot',
