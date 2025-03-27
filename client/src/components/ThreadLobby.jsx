@@ -14,6 +14,7 @@ import ThreadMessage from './ThreadMessage';
 import EmojiPicker from 'emoji-picker-react';
 import { BiSmile } from 'react-icons/bi';
 import { BiSolidPaperPlane } from 'react-icons/bi';
+import { Filter } from 'bad-words';
 
 function ThreadLobby() {
   const scrollToBottomRef = useRef();
@@ -21,7 +22,7 @@ function ThreadLobby() {
   const latestMessagesQuery = query(
     messagesCollectionRef,
     orderBy('createdAt', 'desc'),
-    limit(100)
+    limit(500)
   );
   const [messages] = useCollectionData(latestMessagesQuery, { idField: 'id' });
   const [messageInput, setMessageInput] = useState(
@@ -30,6 +31,33 @@ function ThreadLobby() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const textareaRef = useRef(null);
   const emojiPickerRef = useRef(null);
+  const filter = useRef(new Filter());
+
+  // Add custom words to filter if needed
+  useEffect(() => {
+    // You can add additional inappropriate words here
+    filter.current.addWords('mf');
+    // Remove relatively mild or non-extreme words
+    filter.current.removeWords(
+      'hell',
+      'hells',
+      'crap',
+      'shoot',
+      'piss',
+      'butt',
+      'damn',
+      'sadist',
+      'idiot',
+      'freak',
+      'darn',
+      'turd',
+      'balls',
+      'screwed',
+      'moron',
+      'loser',
+      'bloody'
+    );
+  }, []);
 
   // Scroll to bottom when component mounts and when messages change
   useEffect(() => {
@@ -109,8 +137,11 @@ function ThreadLobby() {
     const { uid } = auth.currentUser;
     const now = new Date();
 
+    // Filter the message text before sending
+    const filteredText = filter.current.clean(messageInput);
+
     await addDoc(messagesCollectionRef, {
-      text: messageInput,
+      text: filteredText,
       createdAt: serverTimestamp(),
       clientTimestamp: now,
       formattedDate: format(now, 'MMMM d, yyyy'),
