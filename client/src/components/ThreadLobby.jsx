@@ -6,6 +6,7 @@ import {
   limit,
   addDoc,
   serverTimestamp,
+  where,
 } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { auth, firestore } from '../../../config/firebase';
@@ -16,15 +17,25 @@ import { BiSmile } from 'react-icons/bi';
 import { BiSolidPaperPlane } from 'react-icons/bi';
 import { Filter } from 'bad-words';
 
-function ThreadLobby() {
+function ThreadLobby({ currentGroup }) {
   const scrollToBottomRef = useRef();
   const messagesCollectionRef = collection(firestore, 'messages');
+
+  // Filter messages by currentGroup
   const latestMessagesQuery = query(
     messagesCollectionRef,
+    where('group', '==', currentGroup),
     orderBy('createdAt', 'desc'),
     limit(500)
   );
-  const [messages] = useCollectionData(latestMessagesQuery, { idField: 'id' });
+
+  const [messages, loading, error] = useCollectionData(latestMessagesQuery, {
+    idField: 'id',
+  });
+  console.log('Fetched messages:', messages);
+  console.log('Loading:', loading);
+  console.log('Error:', error);
+
   const [messageInput, setMessageInput] = useState(
     () => localStorage.getItem('unsentMessage') || ''
   );
@@ -34,11 +45,8 @@ function ThreadLobby() {
   const filter = useRef(new Filter());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Add custom words to filter if needed
   useEffect(() => {
-    // You can add additional inappropriate words here
     filter.current.addWords('mf');
-    // Remove relatively mild or non-extreme words
     filter.current.removeWords(
       'hell',
       'hells',
@@ -59,28 +67,22 @@ function ThreadLobby() {
     );
   }, []);
 
-  // Scroll to bottom when component mounts and when messages change
   useEffect(() => {
     scrollToBottomRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
-  // Additional effect to ensure scroll to bottom on initial load
   useEffect(() => {
-    // Small delay to ensure DOM is fully rendered
     const timer = setTimeout(() => {
       scrollToBottomRef.current?.scrollIntoView({ behavior: 'auto' });
     }, 100);
-
     return () => clearTimeout(timer);
   }, []);
 
-  // Save unsent message to localStorage
   useEffect(() => {
     localStorage.setItem('unsentMessage', messageInput);
   }, [messageInput]);
 
   useEffect(() => {
-    // Fix for iOS viewport height issues when keyboard appears
     const metaViewport = document.querySelector('meta[name=viewport]');
     if (metaViewport) {
       metaViewport.setAttribute(
@@ -88,25 +90,18 @@ function ThreadLobby() {
         'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'
       );
     }
-
-    // Add event listeners to fix iOS keyboard issues
     document.addEventListener('focusin', () => {
-      // When input is focused (keyboard appears)
       window.scrollTo(0, 0);
     });
-
     document.addEventListener('focusout', () => {
-      // When input loses focus (keyboard disappears)
       window.scrollTo(0, 0);
     });
-
     return () => {
       document.removeEventListener('focusin', () => {});
       document.removeEventListener('focusout', () => {});
     };
   }, []);
 
-  // Effect to handle clicking outside the emoji picker
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -117,14 +112,10 @@ function ThreadLobby() {
         setShowEmojiPicker(false);
       }
     }
-
-    // Add event listener when emoji picker is shown
     if (showEmojiPicker) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
     }
-
-    // Clean up the event listener
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
@@ -133,23 +124,19 @@ function ThreadLobby() {
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || isSubmitting) return;
-
     try {
       setIsSubmitting(true);
       const { uid } = auth.currentUser;
       const now = new Date();
-
-      // Filter the message text before sending
       const filteredText = filter.current.clean(messageInput);
-
       await addDoc(messagesCollectionRef, {
         text: filteredText,
         createdAt: serverTimestamp(),
         clientTimestamp: now,
         formattedDate: format(now, 'MMMM d, yyyy'),
         uid,
+        group: currentGroup, // associate message with the active group
       });
-
       setMessageInput('');
       localStorage.removeItem('unsentMessage');
     } finally {
@@ -175,36 +162,25 @@ function ThreadLobby() {
   };
 
   const groupMessagesByDate = (messages) => {
-    // Same function but we need to reverse the messages since we're getting them in desc order
     const grouped = {};
-
-    // If messages is null or empty, return empty object
     if (!messages || messages.length === 0) return grouped;
-
-    // Process messages in reverse order (oldest to newest) for display
     const orderedMessages = [...messages].reverse();
-
     orderedMessages.forEach((message) => {
       try {
-        // Use pre-formatted date if available
         if (message.formattedDate) {
           grouped[message.formattedDate] = grouped[message.formattedDate] || [];
           grouped[message.formattedDate].push(message);
           return;
         }
-
-        // Otherwise use timestamps
         const messageDate =
           message.createdAt?.toDate() ||
           (message.clientTimestamp
             ? new Date(message.clientTimestamp)
             : new Date());
-
         const isValidDate = messageDate instanceof Date && !isNaN(messageDate);
         const date = isValidDate
           ? format(messageDate, 'MMMM d, yyyy')
           : 'Recent';
-
         grouped[date] = grouped[date] || [];
         grouped[date].push(message);
       } catch (error) {
@@ -213,34 +189,22 @@ function ThreadLobby() {
         grouped['Recent'].push(message);
       }
     });
-
     return grouped;
   };
 
   const groupedMessages = messages ? groupMessagesByDate(messages) : {};
 
-  // Function to handle emoji selection - updated to insert at cursor position
   const handleEmojiSelect = (emojiData) => {
-    // Get current cursor position
     const cursorPosition = textareaRef.current.selectionStart;
-
-    // Create new text with emoji inserted at cursor position
     const newText =
       messageInput.substring(0, cursorPosition) +
       emojiData.emoji +
       messageInput.substring(cursorPosition);
-
-    // Update state with new text
     setMessageInput(newText);
-
-    // Close emoji picker
     setShowEmojiPicker(false);
-
-    // Set timeout to focus the textarea and restore cursor position after emoji insertion
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
-        // Set cursor position after the inserted emoji
         const newPosition = cursorPosition + emojiData.emoji.length;
         textareaRef.current.setSelectionRange(newPosition, newPosition);
       }

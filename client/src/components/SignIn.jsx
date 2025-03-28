@@ -40,6 +40,7 @@ function SignIn() {
           name: randomName,
           avatarUrl: defaultAvatarUrl,
           email: user.email,
+          groups: ['general'], // add default group membership
         });
       } else {
         const userData = userDoc.data();
@@ -50,6 +51,9 @@ function SignIn() {
         }
         if (!userData.avatarUrl) {
           updates.avatarUrl = defaultAvatarUrl;
+        }
+        if (!userData.groups) {
+          updates.groups = ['general'];
         }
         if (Object.keys(updates).length > 0) {
           await setDoc(userDocRef, { ...userData, ...updates });
