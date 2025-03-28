@@ -32,6 +32,7 @@ function ThreadLobby() {
   const textareaRef = useRef(null);
   const emojiPickerRef = useRef(null);
   const filter = useRef(new Filter());
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Add custom words to filter if needed
   useEffect(() => {
@@ -131,24 +132,29 @@ function ThreadLobby() {
   }, [showEmojiPicker]);
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim()) return;
+    if (!messageInput.trim() || isSubmitting) return;
 
-    const { uid } = auth.currentUser;
-    const now = new Date();
+    try {
+      setIsSubmitting(true);
+      const { uid } = auth.currentUser;
+      const now = new Date();
 
-    // Filter the message text before sending
-    const filteredText = filter.current.clean(messageInput);
+      // Filter the message text before sending
+      const filteredText = filter.current.clean(messageInput);
 
-    await addDoc(messagesCollectionRef, {
-      text: filteredText,
-      createdAt: serverTimestamp(),
-      clientTimestamp: now,
-      formattedDate: format(now, 'MMMM d, yyyy'),
-      uid,
-    });
+      await addDoc(messagesCollectionRef, {
+        text: filteredText,
+        createdAt: serverTimestamp(),
+        clientTimestamp: now,
+        formattedDate: format(now, 'MMMM d, yyyy'),
+        uid,
+      });
 
-    setMessageInput('');
-    localStorage.removeItem('unsentMessage');
+      setMessageInput('');
+      localStorage.removeItem('unsentMessage');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -309,11 +315,13 @@ function ThreadLobby() {
 
         <button
           className={`bg-[#af7ac5] hover:bg-[#9b59b6] text-white font-bold py-2 px-3 sm:px-4 rounded-lg transition duration-300 flex justify-center items-center ${
-            !messageInput ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
+            !messageInput || isSubmitting
+              ? 'opacity-50 pointer-events-none'
+              : 'cursor-pointer'
           }`}
           type="button"
           onClick={handleSendMessage}
-          disabled={!messageInput}
+          disabled={!messageInput || isSubmitting}
         >
           <BiSolidPaperPlane size={24} />
         </button>
