@@ -211,6 +211,19 @@ function ThreadLobby({ currentGroup }) {
     }, 0);
   };
 
+  // Add this new function to prevent focusing the textarea when clicking emoji button
+  const handleEmojiButtonClick = (e) => {
+    e.preventDefault();
+    // Blur any active element to hide mobile keyboard
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+    // Small delay to ensure blur happens before showing emoji picker
+    setTimeout(() => {
+      setShowEmojiPicker((prev) => !prev);
+    }, 50);
+  };
+
   return (
     <div className="flex flex-col items-center w-full max-w-full sm:max-w-4xl mx-auto relative">
       <main className="p-3 sm:p-4 h-[calc(90vh-8rem)] md:h-[calc(95vh-10rem)] w-full overflow-y-scroll flex flex-col scrollbar-thin scrollbar-thumb-purple-600 bg-gray-200 rounded-t-lg shadow-inner">
@@ -255,7 +268,7 @@ function ThreadLobby({ currentGroup }) {
 
         <button
           type="button"
-          onClick={() => setShowEmojiPicker((prev) => !prev)}
+          onClick={handleEmojiButtonClick}
           className="mr-2 text-white p-1 rounded-full hover:bg-gray-700 transition-colors duration-300 flex items-center justify-center cursor-pointer"
           aria-label="Open emoji picker"
         >
