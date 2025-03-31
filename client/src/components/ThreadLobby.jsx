@@ -257,7 +257,7 @@ function ThreadLobby({ currentGroup }) {
           onMouseDown={(e) => e.preventDefault()} // Prevents focus shift
           onClick={() => {
             if (textareaRef.current) {
-              textareaRef.current.blur(); // Ensure the textarea isn’t focused
+              textareaRef.current.blur(); // Ensure the textarea isn't focused
             }
             setShowEmojiPicker((prev) => !prev);
           }}

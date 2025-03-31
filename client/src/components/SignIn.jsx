@@ -4,6 +4,8 @@ import {
   signInWithPopup,
   FacebookAuthProvider,
   GithubAuthProvider,
+  setPersistence,
+  browserSessionPersistence,
 } from 'firebase/auth';
 import { auth, firestore } from '../../../config/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -28,6 +30,9 @@ function SignIn() {
 
   const handleSignIn = async (provider) => {
     try {
+      // Set persistence to session so that the user is signed out when the browser is closed.
+      await setPersistence(auth, browserSessionPersistence);
+
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const userDocRef = doc(firestore, 'users', user.uid);

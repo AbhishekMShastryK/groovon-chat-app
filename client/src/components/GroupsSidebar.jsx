@@ -110,7 +110,7 @@ const GroupsSidebar = ({
       <div
         className={`
           flex-shrink-0
-          w-48
+          w-54
           bg-gray-100 border-r border-gray-300 p-4
           z-50
           transform transition-transform duration-300
