@@ -212,20 +212,26 @@ function ThreadLobby({ currentGroup }) {
   return (
     <div className="flex flex-col items-center w-full max-w-full sm:max-w-4xl mx-auto relative">
       <main className="p-3 sm:p-4 h-[calc(90vh-8rem)] md:h-[calc(95vh-10rem)] w-full overflow-y-scroll flex flex-col scrollbar-thin scrollbar-thumb-purple-600 bg-gray-200 rounded-t-lg shadow-inner">
-        {Object.keys(groupedMessages).map((date) => (
-          <div key={date}>
-            <div className="flex items-center my-3 sm:my-4">
-              <hr className="flex-grow border-gray-300" />
-              <span className="px-2 sm:px-4 text-gray-500 font-semibold text-xs sm:text-sm">
-                {date}
-              </span>
-              <hr className="flex-grow border-gray-300" />
-            </div>
-            {groupedMessages[date].map((message, index) => (
-              <ThreadMessage key={message.id || index} message={message} />
-            ))}
+        {Object.keys(groupedMessages).length === 0 ? (
+          <div className="flex-grow flex items-center justify-center font-bold italic text-lg text-gray-500">
+            No messages yet
           </div>
-        ))}
+        ) : (
+          Object.keys(groupedMessages).map((date) => (
+            <div key={date}>
+              <div className="flex items-center my-3 sm:my-4">
+                <hr className="flex-grow border-gray-300" />
+                <span className="px-2 sm:px-4 text-gray-500 font-semibold text-xs sm:text-sm">
+                  {date}
+                </span>
+                <hr className="flex-grow border-gray-300" />
+              </div>
+              {groupedMessages[date].map((message, index) => (
+                <ThreadMessage key={message.id || index} message={message} />
+              ))}
+            </div>
+          ))
+        )}
         <span ref={scrollToBottomRef}></span>
       </main>
 
