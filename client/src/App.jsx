@@ -6,7 +6,7 @@ import SignIn from './components/SignIn';
 import { auth, firestore } from '../../config/firebase';
 import ThreadLobby from './components/ThreadLobby';
 import GroupsSidebar from './components/GroupsSidebar';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import AvatarSelectionModal from './components/AvatarSelectionModal';
 import { GiHamburgerMenu } from 'react-icons/gi';
 
@@ -43,11 +43,26 @@ function App() {
   const [userAvatar, setUserAvatar] = useState(
     'https://api.dicebear.com/9.x/pixel-art/svg?seed=Destiny'
   );
-  const [currentGroup, setCurrentGroup] = useState('general');
+  const [currentGroup, setCurrentGroup] = useState(() => {
+    return localStorage.getItem('currentGroup') || 'random';
+  });
   const menuRef = useRef(null);
 
-  // NEW: controls mobile sidebar
+  // Controls mobile sidebar
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Persist currentGroup changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('currentGroup', currentGroup);
+  }, [currentGroup]);
+
+  useEffect(() => {
+    // Only reset if loading is complete and there is no user.
+    if (!loading && !user) {
+      setCurrentGroup('random');
+      localStorage.removeItem('currentGroup');
+    }
+  }, [user, loading]);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const handleSignOut = () => {
@@ -70,27 +85,20 @@ function App() {
   };
 
   useEffect(() => {
-    const fetchUserName = async () => {
-      if (user) {
-        try {
-          const userRef = doc(firestore, 'users', user.uid);
-          const userDoc = await getDoc(userRef);
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserName(userData.name);
-            setUserAvatar(userData.avatarUrl);
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        } finally {
-          setDataLoading(false);
+    if (user) {
+      const userRef = doc(firestore, 'users', user.uid);
+      const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
+          setUserName(userData.name);
+          setUserAvatar(userData.avatarUrl);
         }
-      } else {
         setDataLoading(false);
-      }
-    };
-
-    fetchUserName();
+      });
+      return unsubscribe;
+    } else {
+      setDataLoading(false);
+    }
   }, [user]);
 
   useEffect(() => {

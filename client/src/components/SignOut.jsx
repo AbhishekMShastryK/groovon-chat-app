@@ -7,7 +7,9 @@ function SignOut() {
     auth.currentUser && (
       <button
         className="bg-[#af7ac5] hover:bg-[#9b59b6] text-white font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md transition duration-300 cursor-pointer text-xs sm:text-sm"
-        onClick={() => signOut(auth)}
+        onClick={() => {
+          signOut(auth);
+        }}
       >
         Sign Out
       </button>

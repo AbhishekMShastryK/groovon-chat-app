@@ -40,7 +40,6 @@ function SignIn() {
           name: randomName,
           avatarUrl: defaultAvatarUrl,
           email: user.email,
-          groups: ['general'], // add default group membership
         });
       } else {
         const userData = userDoc.data();
@@ -51,9 +50,6 @@ function SignIn() {
         }
         if (!userData.avatarUrl) {
           updates.avatarUrl = defaultAvatarUrl;
-        }
-        if (!userData.groups) {
-          updates.groups = ['general'];
         }
         if (Object.keys(updates).length > 0) {
           await setDoc(userDocRef, { ...userData, ...updates });
@@ -84,7 +80,12 @@ function SignIn() {
   const signInWithGitHub = () => handleSignIn(new GithubAuthProvider());
 
   return (
-    <div className="flex items-center justify-center w-full h-full p-2">
+    <div className="flex flex-col items-center justify-center w-full h-full p-2">
+      <div className="mb-10 text-center">
+        <p className="text-2xl font-bold italic">
+          From Boredom to Buzz – Join the Chat!
+        </p>
+      </div>
       <div className="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-lg w-11/12 sm:w-96">
         <h2 className="text-lg sm:text-xl font-bold text-center mb-4 sm:mb-6">
           Sign In

@@ -16,6 +16,7 @@ import EmojiPicker from 'emoji-picker-react';
 import { BiSmile } from 'react-icons/bi';
 import { BiSolidPaperPlane } from 'react-icons/bi';
 import { Filter } from 'bad-words';
+import PropTypes from 'prop-types';
 
 function ThreadLobby({ currentGroup }) {
   const scrollToBottomRef = useRef();
@@ -29,12 +30,9 @@ function ThreadLobby({ currentGroup }) {
     limit(500)
   );
 
-  const [messages, loading, error] = useCollectionData(latestMessagesQuery, {
+  const [messages] = useCollectionData(latestMessagesQuery, {
     idField: 'id',
   });
-  console.log('Fetched messages:', messages);
-  console.log('Loading:', loading);
-  console.log('Error:', error);
 
   const [messageInput, setMessageInput] = useState(
     () => localStorage.getItem('unsentMessage') || ''
@@ -300,5 +298,9 @@ function ThreadLobby({ currentGroup }) {
     </div>
   );
 }
+
+ThreadLobby.propTypes = {
+  currentGroup: PropTypes.string.isRequired,
+};
 
 export default ThreadLobby;

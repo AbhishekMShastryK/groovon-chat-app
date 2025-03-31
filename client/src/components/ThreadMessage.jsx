@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { auth, firestore } from '../../../config/firebase';
+import PropTypes from 'prop-types';
 
 function ThreadMessage({ message }) {
   const { text, uid, createdAt, clientTimestamp } = message;
@@ -90,5 +91,16 @@ function ThreadMessage({ message }) {
     </div>
   );
 }
+
+ThreadMessage.propTypes = {
+  message: PropTypes.shape({
+    text: PropTypes.string,
+    uid: PropTypes.string,
+    createdAt: PropTypes.object,
+    clientTimestamp: PropTypes.any,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    formattedDate: PropTypes.string,
+  }).isRequired,
+};
 
 export default ThreadMessage;

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const AvatarSelectionModal = ({ avatarNames, onSelect, onClose }) => {
   return (
@@ -37,6 +38,12 @@ const AvatarSelectionModal = ({ avatarNames, onSelect, onClose }) => {
       </div>
     </div>
   );
+};
+
+AvatarSelectionModal.propTypes = {
+  avatarNames: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onSelect: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 export default AvatarSelectionModal;
